@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="he">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title id="pageTitle">פורום טירוף דיל</title>
+    <link id="dynamicFavicon" rel="icon" href="data:;base64,iVBORw0KGgo=">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2 family=Assistant:wght@300;400;600;800&display=swap');
+        
+        body { 
+            font-family: 'Assistant', sans-serif; 
+            /* רקע עגלות קניות מרוצף מאחורי כל הפורום */
+            background-color: #f1f5f9;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60' viewBox='0 0 60 60'%3E%3Cpath d='M10 20h30l4-12H5V4H1l1 4h4l6 18-2 4v2h32v-4H14v-2zm4 24a3 3 0 1 0 0 6 3 3 0 0 0 0-6zm24 0a3 3 0 1 0 0 6 3 3 0 0 0 0-6z' fill='%23cbd5e1' fill-opacity='0.25'/%3E%3C/svg%3E");
+        }
+        
+        .forum-card {
+            transition: all 0.2s ease-in-out;
+        }
+        
+        .forum-card:hover {
+            border-color: #3b82f6;
+            transform: translateY(-1px);
+        }
+        
+        /* התאמת אזור כתיבת הנושא לתחתית המסך כמו במתמחים טופ */
+        .composer-box {
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+    </style>
+</head>
+<body class="text-gray-950 min-h-screen flex flex-col bg-fixed">
+
+    <nav class="bg-white border-b border-gray-200 sticky top-0 z-40 px-6 py-3 shadow-sm">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            
+            <div class="flex items-center gap-6">
+                <div id="siteLogoDisplay" class="flex items-center gap-2">
+                    <span class="text-2xl font-black bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">פורום טירוף דיל</span>
+                </div>
+                <div class="hidden md:flex items-center gap-4 text-sm font-semibold text-gray-600">
+                    <button onclick="window.filterByTab('all')" class="hover:text-blue-600 flex items-center gap-1"><i class="fa-solid fa-list"></i> כל הנושאים</button>
+                    <button onclick="window.filterByTab('tech')" class="hover:text-blue-600 flex items-center gap-1"><i class="fa-solid fa-laptop"></i> מוצרי טכנולוגיה</button>
+                    <button onclick="window.filterByTab('shoes')" class="hover:text-blue-600 flex items-center gap-1"><i class="fa-solid fa-shoe-prints"></i> נעליים</button>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-3">
+                <button id="adminBtn" onclick="window.toggleAdminPanel()" class="hidden text-xs text-white bg-red-600 hover:bg-red-700 px-4 py-2 rounded-full font-bold shadow-sm transition">
+                    <i class="fa-solid fa-shield-halved ml-1"></i> ניהול מערכת
+                </button>
+                <div id="userAuthArea">
+                    <button onclick="window.handleGoogleLogin()" class="text-sm font-bold text-gray-700 bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded-xl border border-gray-200 transition flex items-center gap-2">
+                        <i class="fa-brands fa-google text-blue-500"></i> התחבר לפורום
+                    </button>
+                </div>
+            </div>
+            
+        </div>
+    </nav>
+
+    <main class="flex-grow max-w-6xl mx-auto w-full px-4 pt-6 pb-24">
+        
+        <div id="forumBannerContainer" class="hidden mb-6 bg-gradient-to-l from-blue-600 to-indigo-700 rounded-2xl p-6 text-white shadow-md relative overflow-hidden">
+            <h2 id="forumBannerTitle" class="text-xl font-bold mb-1"></h2>
+            <p id="forumBannerText" class="text-sm text-blue-100"></p>
+        </div>
+
+        <div class="bg-white p-4 rounded-xl border border-gray-200 shadow-sm mb-4 flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3">
+            <div class="flex flex-wrap items-center gap-2">
+                <button id="tab-all" onclick="window.filterByTab('all')" class="bg-blue-50 text-blue-600 px-4 py-2 rounded-lg text-sm font-bold border border-blue-200">
+                    <i class="fa-solid fa-comments ml-1"></i> כל הנושאים
+                </button>
+                <button id="tab-tech" onclick="window.filterByTab('tech')" class="bg-gray-50 text-gray-600 hover:bg-gray-100 px-4 py-2 rounded-lg text-sm font-semibold border border-gray-200">
+                    מוצרי טכנולוגיה
+                </button>
+                <button id="tab-shoes" onclick="window.filterByTab('shoes')" class="bg-gray-50 text-gray-600 hover:bg-gray-100 px-4 py-2 rounded-lg text-sm font-semibold border border-gray-200">
+                    נעליים
+                </button>
+            </div>
+            
+            <button onclick="window.openComposer()" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-lg text-sm font-bold shadow-md transition flex items-center justify-center gap-2 active:scale-95">
+                <i class="fa-solid fa-plus"></i> נושא חדש
+            </button>
+        </div>
+
+        <div id="threadsLoader" class="hidden text-center py-12">
+            <div class="inline-block animate-spin rounded-full h-8 w-8 border-2 border-blue-600 border-t-transparent"></div>
+            <p class="mt-2 text-gray-500 text-sm">טוען דיונים מהשרת...</p>
+        </div>
+
+        <div id="forumThreadsList" class="space-y-2.5">
+            </div>
+
+    </main>
+
+    <div id="postComposer" class="composer-box fixed bottom-0 left-0 right-0 bg-white border-t border-gray-300 shadow-[0_-8px_30px_rgb(0,0,0,0.12)] z-50 transform translate-y-full">
+        <div class="max-w-6xl mx-auto p-4">
+            
+            <div class="flex justify-between items-center mb-3 pb-2 border-b border-gray-100">
+                <h3 class="font-bold text-gray-800 text-base"><i class="fa-solid fa-pen-to-square text-blue-600 ml-1"></i> יצירת נושא חדש בפורום</h3>
+                <div class="flex items-center gap-2">
+                    <button onclick="window.closeComposer()" class="text-gray-400 hover:text-gray-600 px-2 py-1 text-sm font-bold"><i class="fa-solid fa-chevron-down ml-1"></i> מזער</button>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-2 mb-3">
+                <div class="md:col-span-3">
+                    <select id="composerCategory" class="w-full p-2.5 bg-gray-50 border border-gray-300 rounded-lg text-sm font-semibold outline-none focus:border-blue-500">
+                        <option value="tech">מוצרי טכנולוגיה</option>
+                        <option value="shoes">נעליים</option>
+                    </select>
+                </div>
+                <div class="md:col-span-3">
+                    <select id="composerType" class="w-full p-2.5 bg-gray-50 border border-gray-300 rounded-lg text-sm font-semibold outline-none focus:border-blue-500 text-blue-600">
+                        <option value="בעיה">⚠️ בעיה</option>
+                        <option value="בירור">🔍 בירור</option>
+                        <option value="בקשה">🙏 בקשה</option>
+                        <option value="המלצה">⭐ המלצה</option>
+                        <option value="באג">🐛 באג</option>
+                        <option value="מדריך">📚 מדריך</option>
+                    </select>
+                </div>
+                <div class="md:col-span-6">
+                    <input type="text" id="composerTitle" placeholder="הכנס את כותרת הנושא כאן..." class="w-full p-2.5 bg-gray-50 border border-gray-300 rounded-lg text-sm font-semibold outline-none focus:border-blue-500">
+                </div>
+            </div>
+            
+            <div class="flex flex-col gap-3">
+                <textarea id="composerContent" rows="4" class="w-full p-3 border border-gray-300 rounded-lg text-sm outline-none focus:border-blue-500 resize-none" placeholder="כתוב את תוכן הפוסט שלך כאן..."></textarea>
+                
+                <div class="flex justify-end items-center gap-2">
+                    <button onclick="window.closeComposer()" class="px-4 py-2 border border-gray-300 rounded-lg text-sm font-semibold text-gray-700 hover:bg-gray-50">ביטול</button>
+                    <button onclick="window.submitNewThread()" class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-bold shadow-md flex items-center gap-1.5">
+                        <i class="fa-solid fa-paper-plane"></i> שליחה לפורום
+                    </button>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+
+    <div id="threadViewModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex justify-end">
+        <div class="bg-white w-full max-w-3xl h-full shadow-2xl flex flex-col animate-slide-in">
+            <div class="p-4 border-b border-gray-200 flex justify-between items-center bg-gray-50">
+                <div class="flex items-center gap-2">
+                    <span id="viewThreadType" class="text-xs font-bold px-2 py-1 rounded bg-blue-100 text-blue-700"></span>
+                    <h3 id="viewThreadTitle" class="font-black text-gray-900 text-base md:text-lg truncate max-w-md"></h3>
+                </div>
+                <button onclick="window.closeThreadView()" class="text-gray-400 hover:text-gray-600 text-xl p-1"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="flex-grow overflow-y-auto p-6 space-y-6" id="threadViewContent">
+                </div>
+            <div class="p-4 border-t border-gray-200 bg-gray-50 flex gap-2">
+                <input type="text" id="quickReplyInput" placeholder="כתוב תגובה מהירה לנושא זה..." class="flex-grow p-2.5 border border-gray-300 rounded-xl text-sm outline-none focus:border-blue-500 bg-white">
+                <button onclick="window.submitReply()" class="bg-gray-900 hover:bg-gray-800 text-white px-5 py-2.5 rounded-xl text-sm font-bold transition">תגובה</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="adminPanel" class="hidden fixed inset-y-0 left-0 w-85 bg-gray-950 text-white z-50 p-6 shadow-2xl flex flex-col border-r border-gray-800 overflow-y-auto">
+        <div class="flex justify-between items-center mb-6 border-b border-gray-800 pb-4">
+            <h3 class="text-lg font-bold flex items-center gap-2"><i class="fa-solid fa-shield-halved text-red-500"></i> ענן ניהול פורום</h3>
+            <button onclick="window.toggleAdminPanel()" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+        </div>
+        
+        <div class="space-y-6 flex-grow pb-12">
+            
+            <div class="space-y-3 bg-gray-900 p-4 rounded-xl border border-gray-800">
+                <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider border-b border-gray-800 pb-1.5"><i class="fa-solid fa-users ml-1"></i> ניהול משתמשים ופעילות</h4>
+                <div class="grid grid-cols-2 gap-2 text-center text-xs">
+                    <div class="bg-gray-950 p-2.5 rounded border border-gray-800"><span class="block text-gray-400 text-[10px]">רשומים בפורום</span><span id="forumStatUsers" class="text-lg font-bold">0</span></div>
+                    <div class="bg-gray-950 p-2.5 rounded border border-gray-800"><span class="block text-gray-400 text-[10px]">כניסות היום</span><span id="forumStatVisits" class="text-lg font-bold">0</span></div>
+                </div>
+            </div>
+
+            <div class="space-y-3 bg-gray-900 p-4 rounded-xl border border-gray-800">
+                <h4 class="text-sm font-bold text-blue-400 border-b border-gray-800 pb-1.5"><i class="fa-solid fa-user-shield ml-1"></i> הוספת מנהלי פורום</h4>
+                <div id="forumAdminsList" class="space-y-1.5 max-h-32 overflow-y-auto"></div>
+                <div class="flex gap-2 pt-1">
+                    <input type="email" id="newForumAdminEmail" class="w-full p-2 bg-gray-950 border border-gray-800 rounded-lg text-xs text-white outline-none" placeholder="כתובת מייל להוספה...">
+                    <button onclick="window.addForumAdmin()" class="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap">הוסף</button>
+                </div>
+            </div>
+
+            <div class="space-y-3 bg-gray-900 p-4 rounded-xl border border-gray-800">
+                <h4 class="text-sm font-bold text-red-400 border-b border-gray-800 pb-1.5"><i class="fa-solid fa-folder-open ml-1"></i> ניהול ובקרת נושאים</h4>
+                <p class="text-[11px] text-gray-400">בחר נושא מהרשימה באתר על מנת למחוק או לנעול אותו ישירות מתוך הפורום.</p>
+                <div id="adminThreadsControlList" class="space-y-2 max-h-48 overflow-y-auto">
+                    </div>
+            </div>
+
+            <div class="space-y-3 bg-gray-900 p-4 rounded-xl border border-gray-800">
+                <h4 class="text-sm font-bold text-green-400 border-b border-gray-800 pb-1.5"><i class="fa-solid fa-advertisement ml-1"></i> הוספת באנר הודעות עליון</h4>
+                <div class="flex items-center gap-2"><input type="checkbox" id="forumBannerActive" class="w-4 h-4"><label for="forumBannerActive" class="text-xs text-gray-300">הצג באנר בפורום</label></div>
+                <input type="text" id="forumBannerTitleInput" class="w-full p-2 bg-gray-950 border border-gray-800 rounded-lg text-xs text-white" placeholder="כותרת הבאנר...">
+                <textarea id="forumBannerTextInput" rows="2" class="w-full p-2 bg-gray-950 border border-gray-800 rounded-lg text-xs text-white resize-none" placeholder="תוכן הבאנר..."></textarea>
+                <button onclick="window.saveForumBanner()" class="w-full bg-green-600 hover:bg-green-700 text-white py-2 rounded-lg text-xs font-bold transition">עדכן באנר</button>
+            </div>
+
+            <div class="space-y-3 bg-gray-800/50 p-4 rounded-xl border border-gray-800">
+                <h4 class="text-sm font-bold text-orange-400 border-b border-gray-800 pb-1.5"><i class="fa-solid fa-bullhorn ml-1"></i> הוספת פופאפ קמפיין</h4>
+                <div class="flex items-center gap-2"><input type="checkbox" id="forumPopupActive" class="w-4 h-4"><label for="forumPopupActive" class="text-xs text-gray-300">הפעל פופאפ הודעה</label></div>
+                <input type="text" id="forumPopupTitleInput" class="w-full p-2 bg-gray-950 border border-gray-800 rounded-lg text-xs text-white" placeholder="כותרת הפופאפ...">
+                <textarea id="forumPopupTextInput" rows="2" class="w-full p-2 bg-gray-950 border border-gray-800 rounded-lg text-xs text-white resize-none" placeholder="תוכן הודעת הפופאפ..."></textarea>
+                <button onclick="window.saveForumPopup()" class="w-full bg-orange-600 hover:bg-orange-700 text-white py-2 rounded-lg text-xs font-bold transition">עדכן פופאפ בענן</button>
+            </div>
+            
+        </div>
+    </div>
+
+    <div id="forumPopupModal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-[60] flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-sm w-full p-6 shadow-2xl text-center relative border border-gray-100">
+            <button onclick="document.getElementById('forumPopupModal').classList.add('hidden')" class="absolute top-4 left-4 text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+            <div class="w-12 h-12 bg-orange-50 text-orange-500 rounded-xl flex items-center justify-center mx-auto mb-4 border border-orange-100 text-xl"><i class="fa-solid fa-bullhorn"></i></div>
+            <h3 id="popupTitleDisplay" class="text-lg font-black text-gray-900 mb-2"></h3>
+            <p id="popupTextDisplay" class="text-gray-600 text-xs leading-relaxed mb-5"></p>
+            <button onclick="document.getElementById('forumPopupModal').classList.add('hidden')" class="w-full bg-gray-900 hover:bg-gray-800 text-white py-2.5 rounded-xl font-bold text-sm transition">הבנתי, תודה</button>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+        import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc, updateDoc, increment, arrayUnion, arrayRemove } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+        const MASTER_ADMIN_EMAIL = "xzz556786407@gmail.com";
+        const firebaseConfig = {
+            apiKey: "AIzaSyAFZXSNGr-1-8Q78mjDxaR0RAoh0yXxT48",
+            authDomain: "alibot-deals.firebaseapp.com",
+            projectId: "alibot-deals",
+            storageBucket: "alibot-deals.firebasestorage.app",
+            messagingSenderId: "1052728887673",
+            appId: "1:1052728887673:web:267f0f9c4e51648d2647a8",
+            measurementId: "G-EN67LMTT6T"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const provider = new GoogleAuthProvider();
+        const db = getFirestore(app);
+
+        // קונפיגורציית פורום מקומית
+        window.forumConfig = {
+            admins: [MASTER_ADMIN_EMAIL],
+            banner: { active: false, title: "", text: "" },
+            popup: { active: false, title: "", text: "" },
+            threads: []
+        };
+        
+        window.currentTab = 'all';
+        window.activeThreadId = null;
+        window.isForumAdmin = false;
+
+        // טעינת הפורום
+        window.loadForumData = async function() {
+            document.getElementById('threadsLoader').classList.remove('hidden');
+            try {
+                const snap = await getDoc(doc(db, "forum", "global_settings"));
+                if (snap.exists()) {
+                    window.forumConfig = { ...window.forumConfig, ...snap.data() };
+                } else {
+                    // יצירת הגדרות ראשוניות אם המסמך לא קיים בענן
+                    await setDoc(doc(db, "forum", "global_settings"), window.forumConfig);
+                }
+                
+                applyForumSettingsToUI();
+                window.renderThreads();
+                window.checkForumAdminAccess();
+                window.showForumPopupIfNeeded();
+            } catch (e) {
+                console.error("Error loading forum data:", e);
+                window.renderThreads();
+            }
+            document.getElementById('threadsLoader').classList.add('hidden');
+            
+            // עדכון אנליטיקה
+            try { await setDoc(doc(db, "forum", "analytics"), { visits: increment(1) }, { merge: true }); } catch(err){}
+            window.updateAdminPanelStats();
+        };
+
+        function applyForumSettingsToUI() {
+            const config = window.forumConfig;
+            
+            // עדכון באנר עליון
+            const bannerBox = document.getElementById('forumBannerContainer');
+            if (config.banner && config.banner.active && config.banner.title) {
+                document.getElementById('forumBannerTitle').innerText = config.banner.title;
+                document.getElementById('forumBannerText').innerText = config.banner.text;
+                bannerBox.classList.remove('hidden');
+            } else {
+                bannerBox.classList.add('hidden');
+            }
+            
+            // עדכון שדות קלט בפאנל ניהול
+            if (config.banner) {
+                document.getElementById('forumBannerActive').checked = config.banner.active;
+                document.getElementById('forumBannerTitleInput').value = config.banner.title || "";
+                document.getElementById('forumBannerTextInput').value = config.banner.text || "";
+            }
+            if (config.popup) {
+                document.getElementById('forumPopupActive').checked = config.popup.active;
+                document.getElementById('forumPopupTitleInput').value = config.popup.title || "";
+                document.getElementById('forumPopupTextInput').value = config.popup.text || "";
+            }
+            
+            window.renderAdminsManagementList();
+        }
+
+        window.renderThreads = function() {
+            const listDiv = document.getElementById('forumThreadsList');
+            if (!listDiv) return;
+            
+            let threads = window.forumConfig.threads || [];
+            
+            // סינון לפי טאב/קטגוריה
+            if (window.currentTab !== 'all') {
+                threads = threads.filter(t => t.category === window.currentTab);
+            }
+            
+            if (threads.length === 0) {
+                listDiv.innerHTML = `
+                    <div class="bg-white p-8 rounded-xl border border-gray-200 text-center text-gray-500 shadow-sm">
+                        <i class="fa-solid fa-comments-question text-3xl text-gray-300 mb-2 block"></i>
+                        אין עדיין נושאים בקטגוריה זו. תהיה הראשון לפתוח דיון חדש!
+                    </div>
+                `;
+                return;
+            }
+            
+            // מיון נושאים: החדשים ביותר מופיעים למעלה
+            const sortedThreads = [...threads].sort((a, b) => b.id - a.id);
+            
+            listDiv.innerHTML = sortedThreads.map(t => {
+                const repliesCount = t.replies ? t.replies.length : 0;
+                const categoryName = t.category === 'tech' ? 'מוצרי טכנולוגיה' : 'נעליים';
+                
+                return `
+                    <div class="forum-card bg-white p-4 rounded-xl border border-gray-200 shadow-sm flex items-center justify-between gap-4 cursor-pointer" onclick="window.openThreadView('${t.id}')">
+                        <div class="flex items-center gap-3 min-w-0">
+                            <div class="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-500 border border-gray-100 flex-shrink-0">
+                                <i class="fa-solid fa-message text-sm"></i>
+                            </div>
+                            <div class="min-w-0">
+                                <div class="flex items-center gap-1.5 flex-wrap mb-1">
+                                    <span class="text-[11px] font-bold px-1.5 py-0.5 rounded bg-blue-50 text-blue-600 border border-blue-100">${t.type || 'בירור'}</span>
+                                    <h4 class="font-bold text-gray-900 text-sm sm:text-base hover:text-blue-600 transition truncate">${t.title}</h4>
+                                </div>
+                                <div class="text-xs text-gray-500 flex items-center gap-2 flex-wrap font-medium">
+                                    <span class="text-gray-700 font-bold"><i class="fa-solid fa-circle-user ml-0.5"></i> ${t.author}</span>
+                                    <span>•</span>
+                                    <span>קטגוריה: ${categoryName}</span>
+                                    <span>•</span>
+                                    <span>${t.date}</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-center gap-4 text-center flex-shrink-0 pl-1">
+                            <div class="bg-blue-50/50 px-3 py-1.5 rounded-lg border border-blue-100/40 min-w-[55px]">
+                                <span class="block text-sm font-black text-blue-600">${repliesCount}</span>
+                                <span class="text-[9px] font-bold text-gray-400 uppercase tracking-wider block">תגובות</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            window.renderAdminThreadsControl();
+        };
+
+        window.filterByTab = function(tabName) {
+            window.currentTab = tabName;
+            
+            // עדכון כפתורי העיצוב בבר הסינונים
+            ['all', 'tech', 'shoes'].forEach(t => {
+                const btn = document.getElementById(`tab-${t}`);
+                if (!btn) return;
+                if (t === tabName) {
+                    btn.className = "bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-bold shadow-sm";
+                } else {
+                    btn.className = "bg-white text-gray-600 hover:bg-gray-50 px-4 py-2 rounded-lg text-sm font-semibold border border-gray-200";
+                }
+            });
+            
+            window.renderThreads();
+        };
+
+        // ניהול העורך (Composer)
+        window.openComposer = function() {
+            const user = auth.currentUser;
+            if (!user) {
+                alert("כדי לפתוח נושא חדש בפורום, עליך להתחבר לחשבון שלך.");
+                return;
+            }
+            document.getElementById('postComposer').classList.remove('translate-y-full');
+        };
+
+        window.closeComposer = function() {
+            document.getElementById('postComposer').classList.add('translate-y-full');
+        };
+
+        window.submitNewThread = async function() {
+            const title = document.getElementById('composerTitle').value.trim();
+            const content = document.getElementById('composerContent').value.trim();
+            const category = document.getElementById('composerCategory').value;
+            const type = document.getElementById('composerType').value;
+            
+            if (!title || !content) {
+                alert("אנא מלא את כותרת הנושא ואת תוכן הפוסט.");
+                return;
+            }
+            
+            const user = auth.currentUser;
+            const newThread = {
+                id: Date.now().toString(),
+                title: title,
+                content: content,
+                category: category,
+                type: type,
+                author: user.displayName || 'משתמש פורום',
+                authorEmail: user.email,
+                date: new Date().toLocaleDateString('he-IL') + " " + new Date().toLocaleTimeString('he-IL', {hour: '2-digit', minute:'2-digit'}),
+                replies: []
+            };
+            
+            try {
+                const ref = doc(db, "forum", "global_settings");
+                await updateDoc(ref, {
+                    threads: arrayUnion(newThread)
+                });
+                
+                // איפוס שדות העורך וסגירה
+                document.getElementById('composerTitle').value = "";
+                document.getElementById('composerContent').value = "";
+                window.closeComposer();
+                
+                // רענון נתונים מקומיים
+                window.forumConfig.threads.push(newThread);
+                window.renderThreads();
+                alert("הנושא פורסם בהצלחה בפורום!");
+            } catch (e) {
+                alert("שגיאה בפרסום הנושא. נסה שוב.");
+            }
+        };
+
+        // צפייה בנושא ותגובות
+        window.openThreadView = function(threadId) {
+            const thread = window.forumConfig.threads.find(t => t.id === threadId);
+            if (!thread) return;
+            
+            window.activeThreadId = threadId;
+            document.getElementById('viewThreadType').innerText = thread.type || 'בירור';
+            document.getElementById('viewThreadTitle').innerText = thread.title;
+            
+            const contentDiv = document.getElementById('threadViewContent');
+            
+            // רינדור הפוסט המקורי הראשון
+            let html = `
+                <div class="bg-blue-50/40 p-4 rounded-xl border border-blue-100 flex flex-col gap-2">
+                    <div class="flex justify-between items-center border-b border-blue-100/60 pb-2 text-xs text-gray-500 font-semibold">
+                        <span class="text-gray-800 font-bold"><i class="fa-solid fa-user-circle ml-1"></i> ${thread.author} (${thread.authorEmail})</span>
+                        <span><i class="fa-solid fa-clock ml-1"></i> ${thread.date} #פוסט_ראשי</span>
+                    </div>
+                    <p class="text-sm text-gray-900 leading-relaxed whitespace-pre-wrap pt-1">${thread.content}</p>
+                </div>
+                <div class="text-xs font-bold text-gray-400 border-b border-gray-200 pb-1.5 uppercase tracking-wider"><i class="fa-solid fa-comments ml-1"></i> תגובות חברי הפורום</div>
+            `;
+            
+            // רינדור התגובות אם קיימות
+            if (thread.replies && thread.replies.length > 0) {
+                html += thread.replies.map((r, idx) => `
+                    <div class="bg-white p-4 rounded-xl border border-gray-200 shadow-sm flex flex-col gap-2">
+                        <div class="flex justify-between items-center border-b border-gray-100 pb-2 text-xs text-gray-400 font-medium">
+                            <span class="text-gray-700 font-bold"><i class="fa-solid fa-reply ml-1"></i> ${r.author}</span>
+                            <span>${r.date} #${idx + 1}</span>
+                        </div>
+                        <p class="text-sm text-gray-800 leading-relaxed whitespace-pre-wrap">${r.content}</p>
+                    </div>
+                `).join('');
+            } else {
+                html += `
+                    <div class="text-center text-xs text-gray-400 py-6" id="noRepliesText">
+                        אין עדיין תגובות לנושא זה. כתוב את התגובה הראשונה שלך למטה!
+                    </div>
+                `;
+            }
+            
+            contentDiv.innerHTML = html;
+            document.getElementById('quickReplyInput').value = "";
+            document.getElementById('threadViewModal').classList.remove('hidden');
+        };
+
+        window.closeThreadView = function() {
+            document.getElementById('threadViewModal').classList.add('hidden');
+            window.activeThreadId = null;
+        };
+
+        window.submitReply = async function() {
+            const replyText = document.getElementById('quickReplyInput').value.trim();
+            if (!replyText) return;
+            
+            const user = auth.currentUser;
+            if (!user) {
+                alert("עליך להתחבר כדי להגיב בפורום.");
+                return;
+            }
+            
+            const currentThread = window.forumConfig.threads.find(t => t.id === window.activeThreadId);
+            if (!currentThread) return;
+            
+            const newReply = {
+                author: user.displayName || 'משתמש פורום',
+                authorEmail: user.email,
+                content: replyText,
+                date: new Date().toLocaleDateString('he-IL') + " " + new Date().toLocaleTimeString('he-IL', {hour: '2-digit', minute:'2-digit'})
+            };
+            
+            // יצירת עותק מעודכן של השרשור למניעת שגיאות מערך בפיירבייס
+            const updatedThread = { ...currentThread };
+            if (!updatedThread.replies) updatedThread.replies = [];
+            updatedThread.replies.push(newReply);
+            
+            try {
+                const ref = doc(db, "forum", "global_settings");
+                
+                // עדכון בסיס הנתונים על ידי הסרת הישן והוספת החדש
+                await updateDoc(ref, {
+                    threads: arrayRemove(currentThread)
+                });
+                await updateDoc(ref, {
+                    threads: arrayUnion(updatedThread)
+                });
+                
+                // רענון מקומי מיידי
+                window.forumConfig.threads = window.forumConfig.threads.map(t => t.id === window.activeThreadId ? updatedThread : t);
+                
+                // רענון התצוגה המקומית של חלונית הפוסט
+                window.openThreadView(window.activeThreadId);
+                window.renderThreads();
+            } catch (e) {
+                alert("שגיאה בשמירת התגובה.");
+            }
+        };
+
+        // מערכת בקרת ניהול (ענן ניהול)
+        window.toggleAdminPanel = function() {
+            document.getElementById('adminPanel').classList.toggle('hidden');
+        };
+
+        window.checkForumAdminAccess = function() {
+            const user = auth.currentUser;
+            const admins = window.forumConfig.admins || [MASTER_ADMIN_EMAIL];
+            
+            if (user && admins.some(email => email.toLowerCase() === user.email.toLowerCase())) {
+                document.getElementById('adminBtn').classList.remove('hidden');
+                window.isForumAdmin = true;
+            } else {
+                document.getElementById('adminBtn').classList.add('hidden');
+                window.isForumAdmin = false;
+            }
+        };
+
+        window.updateAdminPanelStats = async function() {
+            try {
+                const snap = await getDoc(doc(db, "forum", "analytics"));
+                if (snap.exists()) {
+                    document.getElementById('forumStatVisits').innerText = snap.data().visits || 0;
+                }
+                const usersSnap = await getDoc(doc(db, "forum", "users_count"));
+                if (usersSnap.exists()) {
+                    document.getElementById('forumStatUsers').innerText = usersSnap.data().registered || 0;
+                }
+            } catch (e) {}
+        };
+
+        window.renderAdminsManagementList = function() {
+            const listDiv = document.getElementById('forumAdminsList');
+            if (!listDiv) return;
+            const admins = window.forumConfig.admins || [MASTER_ADMIN_EMAIL];
+            
+            listDiv.innerHTML = admins.map(email => `
+                <div class="flex justify-between items-center bg-gray-950 px-2.5 py-1.5 rounded-lg border border-gray-800 text-xs">
+                    <span class="truncate pl-2 text-gray-300">${email}</span>
+                    ${email.toLowerCase() !== MASTER_ADMIN_EMAIL.toLowerCase() 
+                        ? `<button onclick="window.removeForumAdmin('${email}')" class="text-red-400 hover:text-red-500"><i class="fa-solid fa-trash-can"></i></button>`
+                        : `<span class="text-gray-500 text-[10px] bg-gray-900 px-2 py-0.5 rounded font-bold">ראשי</span>`
+                    }
+                </div>
+            `).join('');
+        };
+
+        window.addForumAdmin = async function() {
+            const input = document.getElementById('newForumAdminEmail');
+            const email = input.value.trim().toLowerCase();
+            
+            if (!email || !email.includes('@')) return alert("אנא הזן כתובת מייל תקינה.");
+            if (!window.forumConfig.admins) window.forumConfig.admins = [MASTER_ADMIN_EMAIL];
+            
+            if (window.forumConfig.admins.includes(email)) return alert("המנהל כבר קיים במערכת.");
+            
+            window.forumConfig.admins.push(email);
+            try {
+                await setDoc(doc(db, "forum", "global_settings"), window.forumConfig);
+                input.value = "";
+                applyForumSettingsToUI();
+                alert("המנהל נוסף בהצלחה!");
+            } catch(e) {}
+        };
+
+        window.removeForumAdmin = async function(email) {
+            window.forumConfig.admins = window.forumConfig.admins.filter(e => e !== email);
+            try {
+                await setDoc(doc(db, "forum", "global_settings"), window.forumConfig);
+                applyForumSettingsToUI();
+                window.checkForumAdminAccess();
+            } catch(e) {}
+        };
+
+        window.renderAdminThreadsControl = function() {
+            const div = document.getElementById('adminThreadsControlList');
+            if (!div) return;
+            
+            const threads = window.forumConfig.threads || [];
+            if (threads.length === 0) {
+                div.innerHTML = `<div class="text-center text-[11px] text-gray-500 py-2">אין נושאים לניהול.</div>`;
+                return;
+            }
+            
+            div.innerHTML = threads.map(t => `
+                <div class="bg-gray-950 p-2 rounded-lg border border-gray-800 text-xs flex flex-col gap-1.5">
+                    <div class="font-bold text-gray-200 truncate">${t.title}</div>
+                    <div class="text-[10px] text-gray-400 truncate">מאת: ${t.author}</div>
+                    <button onclick="window.deleteThreadFromAdmin('${t.id}')" class="w-full bg-red-600/20 hover:bg-red-600 text-red-400 hover:text-white transition text-[10px] py-1 rounded font-bold">
+                        <i class="fa-solid fa-trash-can ml-1"></i> מחק נושא זה מהפורום
+                    </button>
+                </div>
+            `).join('');
+        };
+
+        window.deleteThreadFromAdmin = async function(threadId) {
+            if (!confirm("האם אתה בטוח שברצונך למחוק נושא זה וכל התגובות שבו לצמיתות מהפורום?")) return;
+            
+            const thread = window.forumConfig.threads.find(t => t.id === threadId);
+            if (!thread) return;
+            
+            try {
+                const ref = doc(db, "forum", "global_settings");
+                await updateDoc(ref, {
+                    threads: arrayRemove(thread)
+                });
+                
+                window.forumConfig.threads = window.forumConfig.threads.filter(t => t.id !== threadId);
+                window.renderThreads();
+                if (window.activeThreadId === threadId) window.closeThreadView();
+                alert("הנושא נמחק בהצלחה על ידי המנהל.");
+            } catch (e) {
+                alert("שגיאה במחיקת הנושא.");
+            }
+        };
+
+        // ניהול באנר ופופאפ מתוך ענן הניהול
+        window.saveForumBanner = async function() {
+            window.forumConfig.banner = {
+                active: document.getElementById('forumBannerActive').checked,
+                title: document.getElementById('forumBannerTitleInput').value.trim(),
+                text: document.getElementById('forumBannerTextInput').value.trim()
+            };
+            try {
+                await setDoc(doc(db, "forum", "global_settings"), window.forumConfig);
+                applyForumSettingsToUI();
+                alert("הבאנר העליון עודכן בענן!");
+            } catch(e) {}
+        };
+
+        window.saveForumPopup = async function() {
+            window.forumConfig.popup = {
+                active: document.getElementById('forumPopupActive').checked,
+                title: document.getElementById('forumPopupTitleInput').value.trim(),
+                text: document.getElementById('forumPopupTextInput').value.trim()
+            };
+            try {
+                await setDoc(doc(db, "forum", "global_settings"), window.forumConfig);
+                localStorage.removeItem("userSeenForumPopup"); // איפוס צפיות למשתמשים
+                applyForumSettingsToUI();
+                alert("הפופאפ עודכן בענן בהצלחה!");
+            } catch(e) {}
+        };
+
+        window.showForumPopupIfNeeded = function() {
+            const p = window.forumConfig.popup;
+            if (!p || !p.active || !p.title) return;
+            
+            if (localStorage.getItem("userSeenForumPopup") === p.title) return;
+            
+            document.getElementById('popupTitleDisplay').innerText = p.title;
+            document.getElementById('popupTextDisplay').innerText = p.text;
+            document.getElementById('forumPopupModal').classList.remove('hidden');
+            localStorage.setItem("userSeenForumPopup", p.title);
+        };
+
+        // מערכת אימות משתמשים (Auth)
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                const name = user.displayName ? user.displayName.split(' ')[0] : 'משתמש';
+                document.getElementById('userAuthArea').innerHTML = `
+                    <div class="flex items-center gap-2 px-3 py-1.5 bg-blue-50 text-blue-700 rounded-xl border border-blue-100 text-sm font-bold shadow-sm">
+                        <i class="fa-solid fa-circle-user ml-0.5 text-base"></i> ${name}
+                        <button onclick="window.handleForumLogout()" class="text-gray-400 hover:text-red-500 mr-1 transition" title="התנתק"><i class="fa-solid fa-power-off"></i></button>
+                    </div>
+                `;
+                
+                // עדכון רשומים בפורום
+                getDoc(doc(db, "forum_users", user.uid)).then(snap => {
+                    if (!snap.exists()) {
+                        setDoc(doc(db, "forum_users", user.uid), { email: user.email, name: user.displayName, joined: new Date().toISOString() });
+                        setDoc(doc(db, "forum", "users_count"), { registered: increment(1) }, { merge: true });
+                    }
+                });
+                
+                window.checkForumAdminAccess();
+            } else {
+                document.getElementById('adminBtn').classList.add('hidden');
+                window.isForumAdmin = false;
+            }
+        });
+
+        window.handleGoogleLogin = async function() {
+            try { await signInWithPopup(auth, provider); window.loadForumData(); } catch(e) {}
+        };
+
+        window.handleForumLogout = function() {
+            signOut(auth).then(() => window.location.reload());
+        };
+
+        // הפעלה ראשונית של המערכת
+        window.loadForumData();
+    </script>
+</body>
+</html>
