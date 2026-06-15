@@ -20,7 +20,7 @@
 
         /* עיצוב תפריט צד מקורי */
         .sidebar-link { 
-            color: #666; 
+            color: #555; 
             border-right: 3px solid transparent; 
             transition: all 0.2s;
         }
@@ -36,14 +36,13 @@
 
         /* הסתרת עמודים לא פעילים */
         .view-section { display: none; }
-        .view-section.active { display: block; animation: fadeIn 0.2s ease-in; }
+        .view-section.active { display: block; animation: fadeIn 0.15s ease-in; }
         
         @keyframes fadeIn {
             from { opacity: 0; }
             to { opacity: 1; }
         }
 
-        /* עיצוב שדות קלט */
         .nodebb-input {
             width: 100%;
             padding: 10px 15px;
@@ -54,15 +53,15 @@
         }
         .nodebb-input:focus {
             outline: none;
-            border-color: #005999;
+            border-color: #3b82f6;
             background-color: #fff;
-            box-shadow: 0 0 0 3px rgba(0, 89, 153, 0.1);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
         }
     </style>
 </head>
 <body class="flex h-screen overflow-hidden">
 
-    <!-- תפריט צד (Sidebar) -->
+    <!-- תפריט צד (Sidebar) - הועתק במדויק מהתמונה -->
     <aside class="w-[260px] bg-white border-l border-gray-200 flex flex-col z-20 shadow-sm shrink-0">
         <div class="h-16 flex items-center px-6 border-b border-gray-200 cursor-pointer" onclick="switchView('categories-view', document.querySelectorAll('.sidebar-link')[0])">
             <span class="text-2xl font-bold text-gray-800 tracking-tight">צרכנות<span class="text-[#005999]">TOP</span></span>
@@ -70,28 +69,37 @@
         
         <nav class="flex-1 py-4 overflow-y-auto text-[15px]">
             <a onclick="switchView('categories-view', this)" class="sidebar-link active flex items-center gap-4 px-6 py-3 cursor-pointer">
-                <i class="fa-solid fa-list-ul w-5 text-center text-lg"></i> דף הבית
+                <i class="fa-solid fa-house w-5 text-center text-lg"></i> דף הבית
             </a>
-            <!-- הכפתור החדש: לא נקראו -->
-            <a onclick="switchView('unread-view', this)" class="sidebar-link flex items-center gap-4 px-6 py-3 cursor-pointer">
-                <i class="fa-solid fa-envelope w-5 text-center text-lg relative">
-                    <!-- נקודה אדומה שמסמנת שיש הודעות שלא נקראו -->
-                    <span class="absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white"></span>
-                </i> 
-                לא נקראו
+            <a onclick="switchView('rules-view', this)" class="sidebar-link flex items-center gap-4 px-6 py-3 cursor-pointer">
+                <i class="fa-solid fa-bars w-5 text-center text-lg"></i> חוקי הפורום
             </a>
+            
+            <!-- לא נקרא - עם התגית הכחולה המדויקת מהתמונה -->
+            <a onclick="switchView('unread-view', this)" class="sidebar-link flex items-center justify-between px-6 py-3 cursor-pointer">
+                <div class="flex items-center gap-4">
+                    <i class="fa-solid fa-inbox w-5 text-center text-lg"></i> לא נקרא
+                </div>
+                <span class="bg-[#3b82f6] text-white text-[11px] font-bold px-2 py-0.5 rounded">184</span>
+            </a>
+            
             <a onclick="switchView('recent-view', this)" class="sidebar-link flex items-center gap-4 px-6 py-3 cursor-pointer">
                 <i class="fa-regular fa-clock w-5 text-center text-lg"></i> פוסטים אחרונים
-            </a>
-            <a onclick="switchView('unsolved-view', this)" class="sidebar-link flex items-center gap-4 px-6 py-3 cursor-pointer">
-                <i class="fa-solid fa-question-circle w-5 text-center text-lg"></i> לא נפתר
             </a>
             <a onclick="switchView('popular-view', this)" class="sidebar-link flex items-center gap-4 px-6 py-3 cursor-pointer">
                 <i class="fa-solid fa-fire w-5 text-center text-lg"></i> פופולרי
             </a>
-            <hr class="my-2 border-gray-200 mx-4">
+            <a onclick="switchView('unsolved-view', this)" class="sidebar-link flex items-center gap-4 px-6 py-3 cursor-pointer">
+                <i class="fa-solid fa-question-circle w-5 text-center text-lg"></i> לא נפתר
+            </a>
             <a onclick="switchView('users-view', this)" class="sidebar-link flex items-center gap-4 px-6 py-3 cursor-pointer">
-                <i class="fa-solid fa-users w-5 text-center text-lg"></i> משתמשים
+                <i class="fa-solid fa-user w-5 text-center text-lg"></i> משתמשים
+            </a>
+            <a onclick="switchView('search-view', this)" class="sidebar-link flex items-center gap-4 px-6 py-3 cursor-pointer">
+                <i class="fa-brands fa-google w-5 text-center text-lg"></i> חיפוש גוגל בפורום
+            </a>
+            <a onclick="switchView('contact-view', this)" class="sidebar-link flex items-center gap-4 px-6 py-3 cursor-pointer">
+                <i class="fa-regular fa-comment-dots w-5 text-center text-lg"></i> צור קשר
             </a>
         </nav>
     </aside>
@@ -99,7 +107,7 @@
     <!-- אזור מרכזי -->
     <main class="flex-1 flex flex-col h-full overflow-y-auto relative bg-[#f8f9fa]">
         
-        <!-- Header עליון -->
+        <!-- Header עליון (ללא נושא חדש, כפי שנהוג במערכת הזו) -->
         <header class="h-16 bg-white border-b border-gray-200 flex justify-between items-center px-4 sticky top-0 z-10">
             <div class="flex items-center gap-4 mr-auto flex-row-reverse">
                 <div class="flex items-center text-sm font-semibold text-[#005999]">
@@ -114,24 +122,34 @@
                 </div>
             </div>
             
-            <div class="flex items-center">
-                <!-- כפתור נושא חדש מעודכן שעובר לעמוד יצירת נושא -->
-                <button onclick="switchView('new-topic-view', null)" class="bg-[#005999] text-white px-4 py-1.5 rounded text-sm font-semibold hover:bg-blue-800 transition">
-                    נושא חדש
-                </button>
-            </div>
+            <!-- אזור ימני ריק בהדר (שומר על האיזון) -->
+            <div></div>
         </header>
 
         <div class="p-4 md:p-6 w-full max-w-6xl mx-auto">
 
-            <!-- עמוד 1: קטגוריות (מסך הבית) -->
-            <div id="categories-view" class="view-section active">
-                <div class="flex gap-4 text-sm font-semibold text-gray-500 mb-4 border-b border-gray-200 pb-2">
-                    <span class="text-[#005999] border-b-2 border-[#005999] pb-2 -mb-2 cursor-pointer">כל הקטגוריות</span>
+            <!-- תבנית שורת הפילטרים והפעולות (כפי שצילמת ב- image_763021.png) 
+                 זה יופיע בעמודי הפוסטים. -->
+            <div id="action-bar" class="hidden bg-[#fbfbfb] border border-gray-200 rounded p-2 mb-4">
+                <div class="flex justify-between items-center text-sm">
+                    <!-- צד ימין: פילטרים -->
+                    <div class="flex items-center gap-6 text-gray-800 font-semibold px-2">
+                        <button class="flex items-center gap-2 hover:text-[#005999] transition"><i class="fa-solid fa-filter text-[#3b82f6]"></i> כל הנושאים</button>
+                        <button class="flex items-center gap-2 hover:text-[#005999] transition"><i class="fa-solid fa-list-ul text-[#3b82f6]"></i> כל הקטגוריות</button>
+                        <button class="flex items-center gap-2 hover:text-[#005999] transition"><i class="fa-solid fa-tags text-[#3b82f6]"></i> כל התגיות</button>
+                        <button class="flex items-center gap-2 hover:text-[#005999] transition"><i class="fa-solid fa-inbox text-[#3b82f6]"></i> סמן כנקרא</button>
+                    </div>
+                    <!-- צד שמאל: כפתור נושא חדש -->
+                    <button onclick="switchView('new-topic-view', null)" class="bg-[#3b82f6] text-white px-5 py-1.5 rounded font-semibold hover:bg-blue-600 transition shadow-sm">
+                        נושא חדש
+                    </button>
                 </div>
+            </div>
 
+            <!-- עמוד 1: קטגוריות (דף הבית) -->
+            <div id="categories-view" class="view-section active">
                 <div class="bg-white rounded border border-gray-200 shadow-sm">
-                    <div class="flex items-center p-4 border-b border-gray-100 hover:bg-gray-50 transition cursor-pointer" onclick="switchView('recent-view', document.querySelectorAll('.sidebar-link')[2])">
+                    <div class="flex items-center p-4 border-b border-gray-100 hover:bg-gray-50 transition cursor-pointer" onclick="switchView('recent-view', document.querySelectorAll('.sidebar-link')[3])">
                         <div class="w-12 h-12 rounded-full bg-[#005999] text-white flex items-center justify-center text-xl shrink-0 ml-4">
                             <i class="fa-solid fa-cart-shopping"></i>
                         </div>
@@ -147,28 +165,22 @@
                 </div>
             </div>
 
-            <!-- עמוד 2: לא נקראו (העמוד החדש!) -->
+            <!-- עמוד 2: לא נקרא -->
             <div id="unread-view" class="view-section">
-                <div class="flex items-center justify-between mb-4 border-b border-gray-200 pb-2">
-                    <div class="flex gap-6 text-sm font-semibold text-gray-800">
-                        <span class="border-b-2 border-gray-800 pb-2 -mb-2"><i class="fa-solid fa-envelope ml-1"></i> נושאים שלא קראת</span>
-                    </div>
-                </div>
-
                 <div class="bg-white rounded border border-gray-200 shadow-sm">
-                    <!-- פוסט דוגמה שלא נקרא (מודגש יותר) -->
-                    <div class="flex items-center p-3 border-l-4 border-l-blue-500 border-b border-gray-100 bg-blue-50/30 hover:bg-gray-50 transition cursor-pointer" onclick="switchView('topic-view', null)">
+                    <!-- פוסט דוגמה שלא נקרא -->
+                    <div class="flex items-center p-3 border-l-4 border-l-[#3b82f6] border-b border-gray-100 bg-blue-50/20 hover:bg-gray-50 transition cursor-pointer" onclick="switchView('topic-view', null)">
                         <div class="w-10 h-10 rounded-full bg-orange-400 text-white flex items-center justify-center font-bold text-lg shrink-0 ml-4">מ</div>
                         <div class="flex-1 min-w-0">
-                            <!-- כותרת מודגשת כדי לסמן שלא נקרא -->
-                            <h2 class="text-[15px] font-bold text-blue-900 truncate mb-1">שאלה | מישהו מכיר חנות אמינה לשואבי אבק?</h2>
+                            <!-- כותרת מודגשת -->
+                            <h2 class="text-[15px] font-bold text-[#005999] truncate mb-1">שאלה | מישהו מכיר חנות אמינה לשואבי אבק?</h2>
                             <div class="flex items-center gap-2 text-[12px]">
                                 <span class="bg-blue-100 text-blue-800 px-1.5 py-0.5 rounded font-semibold">דיונים והמלצות</span>
                                 <span class="text-gray-800 font-semibold">משה <span class="text-gray-500 font-normal">הגיב לפני 10 דקות</span></span>
                             </div>
                         </div>
                         <div class="hidden md:flex items-center gap-6 text-center px-4 text-gray-500">
-                            <span class="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full">חדש</span>
+                            <span class="bg-[#3b82f6] text-white text-[11px] font-bold px-2 py-0.5 rounded">חדש</span>
                         </div>
                     </div>
                 </div>
@@ -176,15 +188,9 @@
 
             <!-- עמוד 3: פוסטים אחרונים -->
             <div id="recent-view" class="view-section">
-                <div class="flex items-center justify-between mb-4 border-b border-gray-200 pb-2">
-                    <div class="flex gap-6 text-sm font-semibold text-gray-500">
-                        <button class="text-[#005999] border-b-2 border-[#005999] pb-2 -mb-2"><i class="fa-solid fa-list ml-1"></i> פוסטים אחרונים</button>
-                    </div>
-                </div>
-
                 <div class="bg-white rounded border border-gray-200 shadow-sm">
-                    <div class="flex items-center p-3 border-b border-gray-100 hover:bg-gray-50 transition" onclick="switchView('topic-view', null)">
-                        <div class="w-10 h-10 rounded-full bg-blue-500 text-white flex items-center justify-center font-bold text-lg shrink-0 ml-4 cursor-pointer">א</div>
+                    <div class="flex items-center p-3 border-b border-gray-100 hover:bg-gray-50 transition cursor-pointer" onclick="switchView('topic-view', null)">
+                        <div class="w-10 h-10 rounded-full bg-[#005999] text-white flex items-center justify-center font-bold text-lg shrink-0 ml-4">א</div>
                         <div class="flex-1 min-w-0">
                             <h2 class="text-[15px] topic-title truncate mb-1">המלצה | רמקול בלוטוס איכותי וכשר ללא רדיו</h2>
                             <div class="flex items-center gap-2 text-[12px]">
@@ -200,67 +206,7 @@
                 </div>
             </div>
 
-            <!-- עמוד 4: כתיבת נושא חדש (העורך) -->
-            <div id="new-topic-view" class="view-section">
-                <h2 class="text-2xl font-bold text-gray-800 mb-6"><i class="fa-solid fa-pen-to-square text-[#005999] ml-2"></i> פתיחת נושא חדש</h2>
-                
-                <div class="bg-white rounded border border-gray-200 shadow-sm p-6">
-                    <div class="mb-4">
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">בחר קטגוריה</label>
-                        <select class="nodebb-input bg-white w-full max-w-md">
-                            <option>דיונים והמלצות - כללי</option>
-                            <option>דואר ומכס</option>
-                            <option>מדריכים</option>
-                        </select>
-                    </div>
-                    
-                    <div class="mb-4">
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">כותרת הנושא</label>
-                        <input type="text" class="nodebb-input font-bold text-lg" placeholder="כתוב כותרת ברורה ותמציתית (לדוגמה: שאלה | איך משחררים חבילה ממכס?)">
-                    </div>
-                    
-                    <div class="mb-6">
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">תוכן ההודעה</label>
-                        <!-- סרגל כלים בסיסי של עורך -->
-                        <div class="border border-gray-200 border-b-0 rounded-t bg-gray-50 p-2 flex gap-3 text-gray-600">
-                            <button class="hover:text-[#005999] px-2"><i class="fa-solid fa-bold"></i></button>
-                            <button class="hover:text-[#005999] px-2"><i class="fa-solid fa-italic"></i></button>
-                            <button class="hover:text-[#005999] px-2"><i class="fa-solid fa-link"></i></button>
-                            <button class="hover:text-[#005999] px-2"><i class="fa-regular fa-image"></i></button>
-                        </div>
-                        <textarea rows="10" class="nodebb-input rounded-t-none border-t-0" placeholder="פרט כאן את שאלתך או בקשתך..."></textarea>
-                    </div>
-                    
-                    <div class="flex justify-end gap-3">
-                        <button onclick="switchView('categories-view', document.querySelectorAll('.sidebar-link')[0])" class="px-6 py-2 text-gray-600 hover:bg-gray-100 rounded font-semibold transition">ביטול</button>
-                        <button onclick="alert('הנושא פורסם!'); switchView('recent-view', document.querySelectorAll('.sidebar-link')[2]);" class="bg-[#005999] text-white px-8 py-2 rounded font-semibold hover:bg-blue-800 transition shadow-sm">פרסם נושא</button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- עמוד 5: צפייה בפוסט עצמו -->
-            <div id="topic-view" class="view-section">
-                <button onclick="switchView('recent-view', document.querySelectorAll('.sidebar-link')[2])" class="mb-4 text-sm font-semibold text-gray-500 hover:text-gray-800 flex items-center gap-2">
-                    <i class="fa-solid fa-arrow-right"></i> חזרה
-                </button>
-                <h1 class="text-2xl font-bold text-gray-800 mb-6">המלצה | רמקול בלוטוס איכותי וכשר ללא רדיו</h1>
-                <div class="bg-white rounded border border-gray-200 shadow-sm mb-4">
-                    <div class="flex flex-col p-5">
-                        <div class="flex items-center gap-3 mb-4">
-                            <div class="w-12 h-12 rounded-full bg-blue-500 text-white flex items-center justify-center font-bold text-xl">א</div>
-                            <div>
-                                <span class="font-bold text-[#005999]">אברהם ישעיהו</span>
-                                <span class="text-xs text-gray-400 block">לפני 3 שעות</span>
-                            </div>
-                        </div>
-                        <div class="text-[15px] leading-relaxed text-gray-800 pl-4">
-                            הזמנתי רמקול בלוטוס מעולה, בלי חיבור ל-WIFI. ממליץ בחום.
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- עמוד 6: התחברות -->
+            <!-- עמוד התחברות -->
             <div id="login-view" class="view-section">
                 <div class="max-w-md mx-auto mt-10">
                     <div class="bg-white rounded border border-gray-200 shadow-sm overflow-hidden">
@@ -282,7 +228,7 @@
                 </div>
             </div>
 
-            <!-- עמוד 7: הרשמה -->
+            <!-- עמוד הרשמה -->
             <div id="register-view" class="view-section">
                 <div class="max-w-md mx-auto mt-6">
                     <div class="bg-white rounded border border-gray-200 shadow-sm overflow-hidden">
@@ -304,25 +250,77 @@
                 </div>
             </div>
 
-            <!-- עמודים ריקים לשאר הכפתורים -->
-            <div id="unsolved-view" class="view-section"><div class="bg-white p-8 rounded border border-gray-200 text-center text-gray-500">נושאים שלא נפתרו.</div></div>
-            <div id="popular-view" class="view-section"><div class="bg-white p-8 rounded border border-gray-200 text-center text-gray-500">נושאים פופולריים.</div></div>
-            <div id="users-view" class="view-section"><div class="bg-white p-8 rounded border border-gray-200 text-center text-gray-500">רשימת משתמשים.</div></div>
+            <!-- עמוד כתיבת נושא חדש -->
+            <div id="new-topic-view" class="view-section">
+                <h2 class="text-2xl font-bold text-gray-800 mb-6"><i class="fa-solid fa-pen-to-square text-[#005999] ml-2"></i> פתיחת נושא חדש</h2>
+                <div class="bg-white rounded border border-gray-200 shadow-sm p-6">
+                    <div class="mb-4">
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">בחר קטגוריה</label>
+                        <select class="nodebb-input bg-white w-full max-w-md">
+                            <option>דיונים והמלצות - כללי</option>
+                            <option>דואר ומכס</option>
+                        </select>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">כותרת הנושא</label>
+                        <input type="text" class="nodebb-input font-bold" placeholder="כתוב כותרת ברורה ותמציתית...">
+                    </div>
+                    <div class="mb-6">
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">תוכן ההודעה</label>
+                        <textarea rows="10" class="nodebb-input" placeholder="פרט כאן..."></textarea>
+                    </div>
+                    <div class="flex justify-end gap-3">
+                        <button onclick="switchView('recent-view', document.querySelectorAll('.sidebar-link')[3])" class="bg-[#3b82f6] text-white px-8 py-2 rounded font-semibold hover:bg-blue-600 transition">פרסם נושא</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- צפייה בפוסט -->
+            <div id="topic-view" class="view-section">
+                <h1 class="text-2xl font-bold text-gray-800 mb-6">המלצה | רמקול בלוטוס איכותי וכשר ללא רדיו</h1>
+                <div class="bg-white rounded border border-gray-200 shadow-sm mb-4 p-5">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-12 h-12 rounded-full bg-blue-500 text-white flex items-center justify-center font-bold text-xl">א</div>
+                        <div>
+                            <span class="font-bold text-[#005999]">אברהם ישעיהו</span>
+                            <span class="text-xs text-gray-400 block">לפני 3 שעות</span>
+                        </div>
+                    </div>
+                    <div class="text-[15px] text-gray-800">רמקול בלוטוס מעולה, בלי חיבור ל-WIFI. ממליץ בחום.</div>
+                </div>
+            </div>
+
+            <!-- שאר העמודים (רק כדי שהכפתורים יעבדו) -->
+            <div id="rules-view" class="view-section"><div class="bg-white p-8 rounded border border-gray-200 text-center font-bold">חוקי הפורום</div></div>
+            <div id="popular-view" class="view-section"><div class="bg-white p-8 rounded border border-gray-200 text-center font-bold">פופולרי</div></div>
+            <div id="unsolved-view" class="view-section"><div class="bg-white p-8 rounded border border-gray-200 text-center font-bold">לא נפתר</div></div>
+            <div id="users-view" class="view-section"><div class="bg-white p-8 rounded border border-gray-200 text-center font-bold">משתמשים</div></div>
+            <div id="search-view" class="view-section"><div class="bg-white p-8 rounded border border-gray-200 text-center font-bold">חיפוש גוגל בפורום</div></div>
+            <div id="contact-view" class="view-section"><div class="bg-white p-8 rounded border border-gray-200 text-center font-bold">צור קשר</div></div>
 
         </div>
     </main>
 
     <script>
         function switchView(viewId, clickedLink) {
-            // הסתרת הכל
+            // מסתיר את כל העמודים
             const views = document.querySelectorAll('.view-section');
             for (let i = 0; i < views.length; i++) {
                 views[i].classList.remove('active');
             }
             
-            // מציג רק את העמוד המבוקש
+            // מציג את העמוד הרצוי
             const targetView = document.getElementById(viewId);
             if (targetView) targetView.classList.add('active');
+            
+            // טיפול בשורת הפילטרים/נושא חדש:
+            // השורה הזו צריכה להופיע רק בעמודים של רשימת פוסטים (לא נקרא, לאחרונה, קטגוריות וכו')
+            const actionBar = document.getElementById('action-bar');
+            if (['unread-view', 'recent-view', 'categories-view', 'popular-view', 'unsolved-view'].includes(viewId)) {
+                actionBar.style.display = 'block';
+            } else {
+                actionBar.style.display = 'none';
+            }
             
             // ניהול צבעים בתפריט הצד
             const links = document.querySelectorAll('.sidebar-link');
@@ -333,6 +331,9 @@
                 clickedLink.classList.add('active');
             }
         }
+
+        // הפעלה ראשונית כדי להציג את בר הפעולות במסך הבית
+        switchView('categories-view', document.querySelectorAll('.sidebar-link')[0]);
     </script>
 </body>
 </html>
